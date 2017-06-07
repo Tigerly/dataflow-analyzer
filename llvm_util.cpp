@@ -51,6 +51,16 @@ namespace LLVMUtil
             }
         }
 
+        return O.str();
+    }
+
+    std::string GetVarNameOrAddr(llvm::Value* val)
+    {
+        std::string raw;
+        llvm::raw_string_ostream O(raw);
+
+        O << GetVarName(val);
+
         if(O.str().empty())
         {
             O << val;
@@ -61,7 +71,7 @@ namespace LLVMUtil
 
     std::string GetVarDescript(llvm::Value* val)
     {
-        std::string ret = GetVarName(val);
+        std::string ret = GetVarNameOrAddr(val);
 
         if(llvm::isa<llvm::Instruction>(val))
         {

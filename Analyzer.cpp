@@ -16,6 +16,8 @@
 #include "Analyzer.hpp"
 #include "llvm_util.hpp"
 
+#define INDEPENDENT_BLOCK
+
 namespace dataflow
 {
     void Analyzer::Analyze(llvm::Function& F)
@@ -37,11 +39,9 @@ namespace dataflow
         // make graph
         for (auto BB = F.begin(); BB != F.end(); ++BB)
         {
-//            llvm::errs() << "bblc: " << LLVMUtil::GetVarName(&*BB);
-//            BB->printAsOperand(llvm::errs(), false);
-//            llvm::errs() << "\n";
             for (auto II = BB->begin(); II != BB->end(); ++II)
             {
+                INDEPENDENT_BLOCK
                 {
                     llvm::AllocaInst* i = llvm::dyn_cast<llvm::AllocaInst>(II);
                     if(i != 0)
@@ -51,6 +51,7 @@ namespace dataflow
                     }
                 }
 
+                INDEPENDENT_BLOCK
                 {
                     llvm::LoadInst* i = llvm::dyn_cast<llvm::LoadInst>(II);
                     if(i != 0)
@@ -60,6 +61,7 @@ namespace dataflow
                     }
                 }
 
+                INDEPENDENT_BLOCK
                 {
                     llvm::StoreInst* i = llvm::dyn_cast<llvm::StoreInst>(II);
                     if(i != 0)
@@ -69,6 +71,7 @@ namespace dataflow
                     }
                 }
 
+                INDEPENDENT_BLOCK
                 {
                     llvm::BinaryOperator* i = llvm::dyn_cast<llvm::BinaryOperator>(II);
                     if(i != 0)
@@ -78,25 +81,35 @@ namespace dataflow
                     }
                 }
 
-//                if(llvm::isa<llvm::BinaryOperator>(II))
-//                {
-//                    auto i = llvm::dyn_cast<llvm::BinaryOperator>(II);
-//                    llvm::errs() << LLVMUtil::GetVarName(&*II)
-//                            << " " << i->getNumOperands()
-//                            << ": ";
-//                    llvm::errs() << LLVMUtil::GetVarName(II->getOperand(0)) << " - "
-//                            << LLVMUtil::GetVarName(II->getOperand(1)) << "\n";
-//                }
-                //llvm::errs() << LLVMUtil::GetVarDescript(&*II) << "\n";
-//                if(II->getOpcode() == llvm::Instruction::Load)
-//                {
-//                    //auto vpVal = llvm::dyn_cast<llvm::LoadInst>(II)->getPointerOperand();
-//                    //llvm::errs() << "   >> oper >> " << LLVMUtil::GetVarDescript(vpVal) << "\n";
-//                }
+                INDEPENDENT_BLOCK
+                {
+                    llvm::CallInst* i = llvm::dyn_cast<llvm::CallInst>(II);
+                    if(i != 0)
+                    {
+                        std::vector<llvm::Value*> args;
+                        llvm::Function* f = i->getCalledFunction();
+                        for(auto a = f->arg_begin(); a != f->arg_end(); ++a)
+                        {
+                            args.push_back(&*a);
+                        }
+                        onCall(i, args);
+                        continue;
+                    }
+                }
             }
         }
 
         llvm::errs() << "$$$ end of function $$$\n";
+
+        for(auto&& v : vars)
+        {
+            llvm::errs() << v.first << ": ";
+            for(auto&& a : v.second)
+            {
+                llvm::errs() << a.first << " (" << LLVMUtil::GetVarDescript(a.first) << ") " << a.second << " | ";
+            }
+            llvm::errs() << "\n";
+        }
     }
 
 } /* namespace dataflow */
@@ -105,36 +118,94 @@ namespace dataflow
 {
     void Analyzer::onAlloca(llvm::Value* target)
     {
-        llvm::errs() << "# alloca # target: " << LLVMUtil::GetVarDescript(target)
-        << "\n";
+//        llvm::errs() << "# alloca # target: " << LLVMUtil::GetVarDescript(target)
+//        << "\n";
+
+        __var_addr addr(target, 0);
+        _var_synonyms syn;
+        syn.push_back(addr);
+        _var_name name = LLVMUtil::GetVarName(target);
+        _var v(name, syn);
+        vars.push_back(v);
     }
 
     void Analyzer::onLoad(llvm::Value* target, llvm::Value* operand)
     {
-        llvm::errs() << "# load   # from  : " << LLVMUtil::GetVarDescript(operand)
-        << "\n"
-        << "           to    : " << LLVMUtil::GetVarDescript(target)
-        << "\n";
+//        llvm::errs() << "# load   # from  : " << LLVMUtil::GetVarDescript(operand)
+//        << "\n"
+//        << "           to    : " << LLVMUtil::GetVarDescript(target)
+//        << "\n";
+
+        for(auto&& v : vars)
+        {
+            for(auto&& a : v.second)
+            {
+                if(a.first == operand)
+                {
+                    v.second.push_back(__var_addr(target, (v.second.end()-1)->second));
+                    return;
+                }
+            }
+        }
     }
 
     void Analyzer::onStore(llvm::Value* target, llvm::Value* operand)
     {
-        llvm::errs() << "# store  # from  : " << LLVMUtil::GetVarDescript(operand)
-        << "\n"
-        << "           to    : " << LLVMUtil::GetVarDescript(target)
-        << "\n";
+//        llvm::errs() << "# store  # from  : " << LLVMUtil::GetVarDescript(operand)
+//        << "\n"
+//        << "           to    : " << LLVMUtil::GetVarDescript(target)
+//        << "\n";
+
+        for(auto&& v : vars)
+        {
+            for(auto&& a : v.second)
+            {
+                if(a.first == target)
+                {
+                    // it is saving modification, so __timeidx increases 1
+                    v.second.push_back(__var_addr(operand, (v.second.end()-1)->second + 1));
+                    if(v.first.empty())
+                    {
+                        v.first = LLVMUtil::GetVarName(operand);
+                    }
+                    return;
+                }
+            }
+        }
     }
 
     void Analyzer::onBinary(llvm::Value* block, llvm::Value* target, llvm::Value* left, llvm::Value* right)
     {
-        llvm::errs() << "# binary # left  : " << LLVMUtil::GetVarDescript(left)
-        << "\n"
-        << "           right : " << LLVMUtil::GetVarDescript(right)
-        << "\n"
-        << "           target: " << LLVMUtil::GetVarDescript(target)
-        << "\n"
-        << "           block : " << LLVMUtil::GetVarDescript(block)
-        << "\n";
+//        llvm::errs() << "# binary # left  : " << LLVMUtil::GetVarDescript(left)
+//        << "\n"
+//        << "           right : " << LLVMUtil::GetVarDescript(right)
+//        << "\n"
+//        << "           target: " << LLVMUtil::GetVarDescript(target)
+//        << "\n"
+//        << "           block : " << LLVMUtil::GetVarDescript(block)
+//        << "\n";
+
+        _cond_type type = (_cond_type)0;
+        for(auto&& b : blocks)
+        {
+            if(b.first == block)
+            {
+                type = b.second;
+                break;
+            }
+        }
+    }
+
+    void Analyzer::onCall(llvm::Value* result, std::vector<llvm::Value*> args)
+    {
+//        llvm::errs() << "# call   # result: " << LLVMUtil::GetVarDescript(result)
+//        << "\n";
+//        for(auto&& a : args)
+//        {
+//
+//            llvm::errs() << "           arg   : " << LLVMUtil::GetVarDescript(a)
+//            <<"\n";
+//        }
     }
 
     void Analyzer::onBranch(llvm::Value* block, _cond_type type)

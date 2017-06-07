@@ -21,7 +21,7 @@ namespace dataflow
     class Analyzer
     {
     protected:
-        typedef int __timeidx; // Increase as soon as there is a `Store' instruction
+        typedef int __timeidx; // Increase as soon as there is a `store' instruction
         typedef std::pair<llvm::Value*, __timeidx> __var_addr;
         typedef std::vector<__var_addr> _var_synonyms;
         typedef std::string _var_name;
@@ -50,6 +50,7 @@ namespace dataflow
         void onStore(llvm::Value* target, llvm::Value* operand);
         void onBinary(llvm::Value* block, llvm::Value* target, llvm::Value* left, llvm::Value* right);
         void onBranch(llvm::Value* block, _cond_type type);
+        void onCall(llvm::Value* result, std::vector<llvm::Value*> args);
 
     protected:
         void Analyze(llvm::Function& F);
