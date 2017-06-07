@@ -14,6 +14,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <list>
 
 namespace dataflow
 {
@@ -21,7 +22,10 @@ namespace dataflow
     class Analyzer
     {
     protected:
-        typedef int __timeidx; // Increase as soon as there is a `store' instruction
+        // Increase as soon as there is a `store' instruction
+        // use -1 to treat as a transform
+        typedef int __timeidx;
+
         typedef std::pair<llvm::Value*, __timeidx> __var_addr;
         typedef std::vector<__var_addr> _var_synonyms;
         typedef std::string _var_name;
@@ -37,7 +41,7 @@ namespace dataflow
         typedef std::vector<_edge> _edge_array;
 
         typedef std::pair<llvm::Value*, _cond_type> __basic_block;
-        typedef std::vector<__basic_block> _basic_block_array;
+        typedef std::list<__basic_block> _basic_block_array;
 
     protected:
         _var_array vars;
@@ -50,7 +54,7 @@ namespace dataflow
         void onStore(llvm::Value* target, llvm::Value* operand);
         void onBinary(llvm::Value* block, llvm::Value* target, llvm::Value* left, llvm::Value* right);
         void onBranch(llvm::Value* block, _cond_type type);
-        void onCall(llvm::Value* result, std::vector<llvm::Value*> args);
+        void onCall(llvm::Value* block, llvm::Value* result, std::vector<llvm::Value*> args);
 
     protected:
         void Analyze(llvm::Function& F);
