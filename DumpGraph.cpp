@@ -5,6 +5,7 @@
  *      Author: aya
  */
 
+#include <llvm/Pass.h>
 #include "DumpGraph.hpp"
 
 static llvm::RegisterPass<dataflow::AnalyzeToDot> XD("dot-dataflow", "Export data-flow to .dot file");
@@ -16,3 +17,17 @@ namespace dataflow
     char AnalyzeToPNet::ID = 1;
 } /* namespace dataflow */
 
+namespace dataflow
+{
+    bool AnalyzeToDot::runOnFunction(llvm::Function& F)
+    {
+        Analyze(F);
+        return false;
+    }
+
+    bool AnalyzeToPNet::runOnFunction(llvm::Function& F)
+    {
+        Analyze(F);
+        return false;
+    }
+}

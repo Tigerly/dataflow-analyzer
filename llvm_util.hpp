@@ -17,6 +17,7 @@ namespace LLVMUtil
     std::string DemangleName(const std::string& name);
 
     std::string GetVarName(llvm::Value* val);
+    std::string GetVarDescript(llvm::Value* val);
 }
 
 #endif

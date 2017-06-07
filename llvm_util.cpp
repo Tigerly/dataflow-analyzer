@@ -39,13 +39,34 @@ namespace LLVMUtil
 
     std::string GetVarName(llvm::Value* val)
     {
-        std::string ret = "";
+        std::string raw;
+        llvm::raw_string_ostream O(raw);
 
-        ret += val->getName().str();
+        O << val->getName();
+        if(O.str().empty())
+        {
+            if(llvm::isa<llvm::ConstantInt>(val))
+            {
+                O << llvm::cast<llvm::ConstantInt>(val)->getSExtValue();
+            }
+        }
+
+        if(O.str().empty())
+        {
+            O << val;
+        }
+
+        return O.str();
+    }
+
+    std::string GetVarDescript(llvm::Value* val)
+    {
+        std::string ret = GetVarName(val);
+
         if(llvm::isa<llvm::Instruction>(val))
         {
             ret += ": ";
-            ret += InstToStr(llvm::dyn_cast<llvm::Instruction>(val));
+            ret += InstToStr(llvm::cast<llvm::Instruction>(val));
         }
 
         return ret;

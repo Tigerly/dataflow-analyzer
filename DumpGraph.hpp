@@ -8,7 +8,7 @@
 #ifndef DUMPGRAPH_HPP_
 #define DUMPGRAPH_HPP_
 
-#include <llvm/IR/Module.h>
+#include <llvm/IR/Function.h>
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Instruction.h>
 
@@ -17,20 +17,20 @@
 namespace dataflow
 {
     
-    class AnalyzeToDot : public Analyzer, public llvm::ModulePass
+    class AnalyzeToDot : public Analyzer, public llvm::FunctionPass
     {
     public:
-        AnalyzeToDot() : llvm::ModulePass(ID){};
+        AnalyzeToDot() : llvm::FunctionPass(ID){};
         static char ID;
-        bool runOnModule(llvm::Module& M);
+        bool runOnFunction(llvm::Function& F);
     };
 
-    class AnalyzeToPNet : public Analyzer, public llvm::ModulePass
+    class AnalyzeToPNet : public Analyzer, public llvm::FunctionPass
     {
     public:
-        AnalyzeToPNet() : llvm::ModulePass(ID){};
+        AnalyzeToPNet() : llvm::FunctionPass(ID){};
         static char ID;
-        bool runOnModule(llvm::Module& M);
+        bool runOnFunction(llvm::Function& F);
     };
 
 } /* namespace dataflow */
