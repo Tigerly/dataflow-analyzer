@@ -19,6 +19,7 @@ namespace dataflow
     
     class AnalyzeToDot : public Analyzer, public llvm::FunctionPass
     {
+        std::ofstream out;
     public:
         AnalyzeToDot() : llvm::FunctionPass(ID){};
         static char ID;
