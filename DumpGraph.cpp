@@ -9,6 +9,7 @@
 #include <fstream>
 #include "DumpGraph.hpp"
 #include "str_util.hpp"
+#include "llvm_util.hpp"
 
 static llvm::RegisterPass<dataflow::AnalyzeToDot> XD("dot-dataflow", "Export data-flow to .dot file");
 static llvm::RegisterPass<dataflow::AnalyzeToPNet> XP("pnet-dataflow", "Export data-flow to .xml file used in PIPE 5");
@@ -46,22 +47,22 @@ namespace dataflow
                 {
                     label += "_" + str_util::to_string(a.second);
                 }
-                out << "N" << a.first << " [label=\"" << label
-                        << "\" shape=\"" << shape << "\"]; \n";
+                out << "\"" << label << "\" "
+                        << "[shape=\"" << shape << "\"]; \n";
             }
         }
 
-        for(auto&& v : vars)
-        {
-            for(auto i = v.second.begin(); i != v.second.end(); ++i)
-            {
-                if(i+1 != v.second.end() && i->second == (i+1)->second)
-                {
-                    out << "N" << i->first << " -> " << "N" << (i+1)->first
-                            << " [shape=\"none\" style=\"dashed\"]; \n";
-                }
-            }
-        }
+//        for(auto&& v : vars)
+//        {
+//            for(auto i = v.second.begin(); i != v.second.end(); ++i)
+//            {
+//                if(i+1 != v.second.end() && i->second == (i+1)->second)
+//                {
+//                    out << "N" << i->first << " -> " << "N" << (i+1)->first
+//                            << " [shape=\"none\" style=\"dashed\"]; \n";
+//                }
+//            }
+//        }
 
         for(auto&& e : edges)
         {
@@ -74,8 +75,43 @@ namespace dataflow
             {
                 shape = "odot";
             }
-            out << "N" << e.first.first << " -> " << "N" << e.first.second
-                    << " [shape=\"" << shape << "\"]; \n";
+
+            std::string left = "";
+            std::string right = "";
+
+            for(auto&& v : vars)
+            {
+                for(auto&& a : v.second)
+                {
+                    if(e.first.first == a.first)
+                    {
+                        left = v.first;
+                        if(a.second != -1)
+                         {
+                            if(left.empty())
+                            {
+                                left = LLVMUtil::GetVarNameOrAddr(e.first.first);
+                            }
+                            left += "_" + str_util::to_string(a.second);
+                        }
+                    }
+                    if(e.first.second == a.first)
+                    {
+                        right = v.first;
+                        if(a.second != -1)
+                         {
+                            if(right.empty())
+                            {
+                                right = LLVMUtil::GetVarNameOrAddr(e.first.second);
+                            }
+                            right += "_" + str_util::to_string(a.second);
+                        }
+                    }
+                }
+            }
+
+            out << "\"" << left << "\" -> \"" << right << "\""
+                    << " [arrowhead=\"" << shape << "\"]; \n";
         }
 
         out << "}";
