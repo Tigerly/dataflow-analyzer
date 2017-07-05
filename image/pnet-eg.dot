@@ -1,0 +1,29 @@
+digraph G
+{
+    splines=false
+    rankdir=LR
+    subgraph place
+    {
+        node [shape="ellipse" fontname="Source Code Pro"]
+	c [label="Customer\nWaiting"]
+	u [label="Cutting"]
+	i [label="Idle\nBarber"]
+	p [label="Customer\nPaying"]
+    }
+    subgraph trans
+    {
+        node [shape="box" fontname="Source Code Pro"]
+	e [label="Enter"]
+	s [label="Start\nCutting"]
+	f [label="Finish\nCutting"]
+	x [label="Exit"]
+    }
+    e -> c
+    c -> s
+    i -> s
+    s -> u
+    u -> f
+    f -> p
+    f -> i
+    p -> x
+}

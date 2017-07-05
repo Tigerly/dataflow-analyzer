@@ -1,0 +1,64 @@
+digraph G
+{
+    //splines=false
+    node [fontname="Source Code Pro"]
+    edge [fontname="Source Code Pro"]
+
+    start [label="Start" shape="ellipse"]
+    end   [label="End"   shape="ellipse"]
+
+    bb_s [label="Get Basic Block"  shape="box"]
+    bb_i [label="Next Basic Block" shape="box"]
+    bb_e [label="End of BB Iter?"  shape="diamond"]
+
+    ii_s [label="Get Instruction"   shape="box"]
+    ii_i [label="Next Instruction"  shape="box"]
+    ii_e [label="End of Inst Iter?" shape="diamond"]
+
+    t_mem [label="Memory Inst?" shape="diamond"]
+    t_bin [label="Binary Inst?" shape="diamond"]
+    t_br  [label="Branch Inst?" shape="diamond"]
+    t_sw  [label="Switch Inst?" shape="diamond"]
+
+    match  [label="Match Var"          shape="note" color="green"]
+    add_pl [label="Append Place"       shape="box3d" color="green"]
+    add_tr [label="Append Transition"  shape="box3d" color="green"]
+    mark   [label="Mark Exclusion"     shape="note"  color="green"]
+    add_br [label="Append Branch List" shape="box3d" color="green"]
+
+    start -> bb_i
+
+    bb_i  -> bb_e
+    bb_e  -> end [label="Y" color="blue"]
+    bb_e  -> bb_s [label="N" color="red"]
+
+    bb_s  -> ii_i
+
+    ii_i  -> ii_e
+    ii_e  -> bb_i [label="Y" color="blue"]
+    ii_e  -> ii_s [label="N" color="red"]
+
+    ii_s  -> t_mem
+    
+    t_mem -> t_bin [label="N" color="red"]
+    t_bin -> t_br  [label="N" color="red"]
+    t_br  -> t_sw  [label="N" color="red"]
+    t_sw  -> ii_i  [label="N" color="red"]
+
+    t_mem -> match  [label="Y" color="blue"]
+    match -> add_pl
+    t_bin -> add_tr [label="Y" color="blue"]
+    t_br  -> mark   [label="Y" color="blue"]
+    t_sw  -> mark   [label="Y" color="blue"]
+    mark  -> add_br
+
+    add_pl -> ii_i
+    add_tr -> ii_i
+    add_br -> ii_i
+
+    table [label="PetriNet Graph" shape="folder" color="orange"]
+
+    add_pl -> table [style="dashed" color="grey"]
+    add_tr -> table [style="dashed" color="grey"]
+    add_br -> table [style="dashed" color="grey"]
+}

@@ -1,0 +1,35 @@
+
+\begin{center}
+    \LARGE{\vspace*{0.3em}}
+    \LARGE{Program structure model graph generation \\ based on LLVM and stochastic PetriNet}
+    \LARGE{\vspace{1em}}
+
+    \Large{ABSTRACT}
+\end{center}
+
+The demand for smart hardware is increasing, with the growth of technology.
+People hope smart hardwares can do more complex jobs.
+Nowadays, image recognition, in-depth learning etc. are popular.
+So they are naturally wanted to run on smart hardwares.
+
+However, smart hardwares are basically embedded platform.
+Performance of one CPU is not good on embedded systems.
+It is hard to run an algorithm of image recognition.
+Fortunately, last high-level embedded systems use multi-core CPU,
+even have powerful GPU supporting general computing.
+Making full use of these computing resources, can significantly improve code performance.
+This will let the software do more complex jobs.
+Parallelizing legacy code is a way to make the computing resources fully used.
+
+Parallel code focuses on data dependency.
+With the guide of data dependency, we can simplify the effort of refactor.
+Using the machine instead of manual to analyze data dependency,
+can save much time, improve the efficiency of refactor.
+
+This article introduces a method.
+We use LLVM, develop a plugin for it.
+Basing on a image recognition project to generate a graph of data dependency.
+
+\vspace{1em}
+
+\textbf{Keywords: }\textnormal{LLVM, Stochastic PetriNet, Data Dependency, Dataflow, DFG, Parallelize, Optimize}
