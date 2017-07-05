@@ -7,18 +7,11 @@
 LLVM_CONF=llvm-config
 
 CLANG_DIR = $(shell $(LLVM_CONF) --bindir)
-LLVM_CXXFLAGS = $(shell $(LLVM_CONF) --cxxflags)
+CXXFLAGS = -I $(CLANG_DIR)/../include -fPIC -Wall -std=c++11 -g -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
 
-# leave empty to prevent error 'xxx is registerd more than once'.
-# this is decided by how clang is installed in your system.
-LLVM_LIBS = 
-# LLVM_LIBS = $(shell $(LLVM_CONF) --libs)
-LLVM_LDFLAGS = $(shell $(LLVM_CONF) --ldflags)
-
-CXX = $(CLANG_DIR)/clang
-C   = $(CLANG_DIR)/clang
-LD  = $(CLANG_DIR)/clang
-OPT = $(CLANG_DIR)/opt
+CXX = g++
+C   = g++
+LD  = g++
 
 #========================================
 # targets
@@ -35,10 +28,10 @@ TARG := libdfa.so
 all: $(TARG)
 
 %.o: %.cpp
-	$(CXX) -o $@ $(LLVM_CXXFLAGS) -c $<
+	$(CXX) -o $@ $(CXXFLAGS) -c $<
 
 $(TARG): $(OBJS)
-	$(LD) --shared -o $(TARG) $(OBJS) $(LLVM_LDFLAGS) $(LLVM_LIBS)
+	$(LD) --shared -o $(TARG) $(OBJS)
 
 clean:
 	rm -rf $(OBJS) $(TARG)
