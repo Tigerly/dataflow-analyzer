@@ -27,7 +27,7 @@
 %%% Feature
 \usepackage[hyphens]{url} % input url
 \usepackage[strings]{underscore} % treat underling as common string
-%\usepackage{hyperref}
+\usepackage{hyperref}
 \usepackage{titlesec}
 \usepackage{listings} % put source code into document
 \usepackage{xcolor} % change color of lstlisting
@@ -176,7 +176,7 @@
     breaklines=true,
     frame=shadowbox,
     keywordstyle=\color{green!30!black},
-    commentstyle=\color{orange!40!black},
+    commentstyle=\color{white!40!black}\textit,
     numbers=left,
     numberstyle=\color{darkgray},
     stringstyle=\color{purple},
@@ -193,7 +193,7 @@
     breaklines=true,
     frame=shadowbox,
     keywordstyle=\color{green!30!black},
-    commentstyle=\color{orange!40!black},
+    commentstyle=\color{white!40!black}\textit,
     numbers=left,
     numberstyle=\color{darkgray},
     stringstyle=\color{purple},
@@ -222,7 +222,7 @@
     breaklines=true,
     frame=shadowbox,
     keywordstyle=\color{green!30!black},
-    commentstyle=\color{orange!40!black},
+    commentstyle=\color{white!40!black}\textit,
     numbers=left,
     numberstyle=\color{darkgray},
     stringstyle=\color{purple},
@@ -235,7 +235,7 @@
     breaklines=true,
     frame=shadowbox,
     keywordstyle=\color{green!30!black},
-    commentstyle=\color{orange!40!black},
+    commentstyle=\color{white!40!black}\textit,
     numbers=left,
     numberstyle=\color{darkgray},
     stringstyle=\color{purple},
@@ -251,3 +251,13 @@
 \floatname{algorithm}{算法}
 \renewcommand{\algorithmicrequire}{\textbf{输入:}}
 \renewcommand{\algorithmicensure}{\textbf{输出:}}
+
+%%% hyperref
+\hypersetup
+{
+    colorlinks,
+    linkcolor={magenta!80!black},
+    citecolor={cyan!80!black},
+    urlcolor={blue!80!black},
+}
+
